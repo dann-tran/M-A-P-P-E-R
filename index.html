@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+	<title>Gaming life</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>	
+
+</head>
+
+<body>
+    <main>
+        <div id="page-wrapper">
+            <h3>Gaming life</h3>
+        </div>
+        <div id="container" />
+    </main>
+    <script>
+    let TerrainGeneration = function(s) {
+        let w = 1200;
+        let h = 900;
+        let scl = 20;
+        let cols = w / scl;
+        let rows = h / scl;
+        let terrain = [];
+        let flying = 0;
+        let speed = 0.1;
+        let inconsolata;
+
+        s.preload = () => {
+            inconsolata = s.loadFont("https://picasdan9.github.io/gaming-life-assignment/Roboto-Regular.ttf");
+            console.log(inconsolata);
+        }
+
+        s.setup = () => {
+            s.createCanvas(600, 600, s.WEBGL);
+            s.textFont(inconsolata);
+            s.textSize(s.width / 3);
+            s.textAlign(s.CENTER, s.CENTER);
+        }
+
+        s.draw = () => {
+            // flying -= speed;
+            if (s.keyIsDown(87))
+                flying -= speed;
+            else if (s.keyIsDown(83))
+                flying += speed;
+            let yoff = flying;
+
+            for (let y = 0; y < rows; y++) {
+                let xoff = 0;
+                for (let x = 0; x < cols; x++) {
+                    if (!terrain[x])
+                        terrain[x] = []; 
+                    terrain[x][y] = s.map(s.noise(xoff, yoff), 0, 1, -100, 100);
+                    xoff += 0.2;
+                }
+                yoff += 0.2;
+            }
+            
+            s.background(0);
+            s.stroke(255);
+            s.noFill();
+
+            s.rotateX(s.PI/3);
+            s.translate(-w/2, -h/2);
+
+            for (let y = 0; y < rows - 1; y++) {
+                s.beginShape(s.TRIANGLE_STRIP);
+                for (let x = 0; x < cols; x++) {
+                    s.vertex(x*scl, y*scl, terrain[x][y]);
+                    s.vertex(x*scl, (y + 1)*scl, terrain[x][y + 1]);
+                }
+                s.endShape();
+            }
+
+            s.translate(w/2, h/2);
+
+            s.fill(255);
+            ["gaming", "life", "is", "meaningless"].forEach((t, idx) => {
+                s.translate(0, -(10*idx + flying)*scl*10, 0);
+                s.rotateX(-s.PI/2);
+                s.text(t, 0, 0);
+                s.rotateX(s.PI/2);
+            })
+        }
+    }
+    new p5(TerrainGeneration, 'container');
+    </script>
+</body>
+
+
+</html>
