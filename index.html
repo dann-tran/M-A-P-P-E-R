@@ -11,7 +11,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-xRadius=1">
 	<title>Gaming life</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>	
 
@@ -19,9 +19,6 @@
 
 <body>
     <main>
-        <div id="page-wrapper">
-            <h3>Gaming life</h3>
-        </div>
         <div id="container" />
     </main>
     <script>
@@ -118,81 +115,135 @@
     }
 
     let eyes = s => {
-        let phase = 0;
-        const phaseDelta = 1/120, eyes = [];
+        const eyes = [];
 
         class Eye {
-            constructor(x, y, r1, r2) {
-                this.x = x;
-                this.y = y;
-                this.r1 = r1;
-                this.r2 = r2;
-                this.vx = x;
-                this.vy = y;
+            constructor(xRadius, nodeAmount, x, y) {
+                this.xPos1 = - xRadius + x;
+                this.yPos1 = y;
+                this.xNode1 =  - nodeAmount + x;
+                this.yNode1 = - nodeAmount + y;
+                
+                this._yNode1 = nodeAmount + y;
+                
+                this.xNode2 = nodeAmount + x;
+                this.yNode2 = - nodeAmount + y;
+
+                this._yNode2 = nodeAmount + y;
+
+                this.xPos2 = xRadius + x;
+                this.yPos2 = y;
+                
+                this.nodeAmount = nodeAmount;
+                this.yPosOffset = y;
+                this.eyexRadius = xRadius;
+                this.eyeState = 0;
+                this.blinkSpeed = 4;
+                this.blinkMaxTime = s.random(300, 800);
+                this.timer = 0;
+
+                // pupil
+                this.xPosEllipse = this.xPos1 + (this.xPos2 - this.xPos1)/2;
+                this.yPosEllipse = this.yPos2 + (this.yPos2 - this.yPos1)/2;
+                this.eyeMovementX = 0;
+                this.eyeMovementY = 0;
+                this.closingEye = false;
             }
 
-            // constructor(scale, nodeAmount, xMovement, yMovement) {
-            //     this.xPos1 = (s.width/2 - scale) + xMovement;
-            //     this.yPos1 = s.height/2 + yMovement;
-            //     this.xNode1 = (s.width/2 - nodeAmount) + xMovement;
-            //     this.yNode2 = (s.height/2 - nodeAmount) + yMovement;
-            //     this.
-            // }
-
-            draw() {
-                s.fill(255);
-                s.stroke(0);
-                s.ellipse(this.x, this.y, this.r1*2, this.r1*2);
-                s.push();
-                s.fill(255, 0, 0);
-                s.noStroke();
-                const a = s.atan2(s.mouseY - this.y, s.mouseX - this.x);
-                let x2 = this.x + (this.r1 - this.r2)*s.cos(a);
-                let y2 = this.y + (this.r1 - this.r2)*s.sin(a);
-                if (s.dist(this.x, this.y, s.mouseX, s.mouseY) < this.r1 - this.r2) {
-                    x2 = s.mouseX;
-                    y2 = s.mouseY;
+            display() {
+                this.eyeMovementX = s.random(0, 3);
+                if (this.timer < this.blinkMaxTime) this.timer++;
+                else {
+                    this.blinkMaxTime = s.random(300, 800);
+                    this.blink();
+                    this.timer = 0;
                 }
-                this.vx = s.lerp(this.vx, x2, 0.05);
-                this.vy = s.lerp(this.vy, y2, 0.05);
-                s.ellipse(this.vx, this.vy, this.r2*2, this.r2*2);
-                s.pop();
+
+                s.stroke(0);
+                s.fill(255);
+                s.bezier(this.xPos1, this.yPos1, this.xNode1, this.yNode1, this.xNode2, this.yNode2, this.xPos2, this.yPos2);
+                s.bezier(this.xPos1, this.yPos1 - 1, this.xNode1, this._yNode1, this.xNode2, this._yNode2, this.xPos2, this.yPos2 - 1);
+
+                s.fill(0);
+                s.ellipse(this.xPosEllipse + this.eyeMovementX, this.yPosEllipse + this.eyeMovementY, 50, 50);
+
+                if (s.mouseX > this.xPos1 && s.mouseX < this.xPos2 && s.mouseY > this.yPos1 - this.nodeAmount && s.mouseY < this.yPos1 + this.nodeAmount)
+                    this.closeEye();
+                else this.openEye();
+
+                if (s.mouseX > this.xPosEllipse && this.xPosEllipse + 35 < this.xPos2) this.xPosEllipse += 10;
+                if (s.mouseX < this.xPosEllipse && this.xPosEllipse - 35 > this.xPos1) this.xPosEllipse -= 10;
+                if (s.mouseY > this.yPosEllipse && this.yPosEllipse + 35 < this.yPos1 + this.nodeAmount) this.yPosEllipse += 10;
+                if (s.mouseY < this.yPosEllipse && this.yPosEllipse - 35 > this.yPos1 - this.nodeAmount) this.yPosEllipse -= 10;
+
+                if (this.eyeState == -1) {
+                    let flag = true;
+                    if (this.yNode1 < this.yPosOffset) {
+                        this.yNode1 += this.blinkSpeed;
+                        flag = false;
+                    }
+                    if (this.yNode2 < this.yPosOffset) {
+                        this.yNode2 += this.blinkSpeed;
+                        flag = false;
+                    }
+                    if (this._yNode1 > this.yPosOffset) {
+                        this._yNode1 -= this.blinkSpeed;
+                        flag = false;
+                    }
+                    if (this._yNode2 > this.yPosOffset) {
+                        this._yNode2 -= this.blinkSpeed;
+                        flag = false;
+                    }
+                    if (flag) this.eyeState = 1;
+                }
+                if (this.eyeState == 1) {
+                    let flag = true;
+                    if (this.yNode1 >- this.nodeAmount + this.yPosOffset) {
+                        this.yNode1 -= this.blinkSpeed;
+                        flag = false;
+                    } 
+                    if (this.yNode2 > - this.nodeAmount + this.yPosOffset) {
+                        this.yNode2 -= this.blinkSpeed;
+                        flag = false;
+                    } 
+                    if (this._yNode1 < + this.nodeAmount + this.yPosOffset) {
+                        this._yNode1 += this.blinkSpeed;
+                        flag = false;
+                    }
+                    if (this._yNode2 < + this.nodeAmount + this.yPosOffset) {
+                        this._yNode2 += this.blinkSpeed;
+                        flag = false;
+                    } 
+                    if (flag && !this.closingEye) this.eyeState = 0;
+                }
+            }
+
+            closeEye() {
+                this.eyeState = -1;
+                this.closingEye = true;
+            }
+
+            openEye() {
+                this.eyeMovementX = 0;
+                this.eyeMovementY = 0
+                this.closingEye = false;
+            }
+
+            blink() {
+                this.eyeState = -1;
             }
         }
         s.setup = () => {
-            s.createCanvas(500, 500);
-            let i = 0;
-            while (i < 20) {
-                let r1 = s.random(10, 50);
-                let r2 = r1 * s.random(0.3, 0.6);
-                let x = s.random(r1, s.width - r1);
-                let y = s.random(r1, s.height - r1);
-                if (i == 0) {
-                    eyes[i] = new Eye(x, y, r1, r2);
-                    i++;
-                } else {
-                    let overlap = false;
-                    for (let j = 0; j < eyes.length; j++) {
-                        const e = eyes[j];
-                        const d = s.dist(x, y, e.x, e.y);
-                        if (d < r1 + e.r1) {
-                            overlap = true;
-                            break;
-                        }
-                    }
-                    if (!overlap) {
-                        eyes[i] = new Eye(x, y, r1, r2);
-                        i++;
-                    }
-                }
-            }
+            s.createCanvas(s.windowWidth, 2040);
+            s.background(0);
+            for (let i = 0; i < s.width/150; i++)
+                for (let j = 0; j < s.height/140; j++)
+                    eyes.push(new Eye(s.random(50, 70), s.random(30, 50), 70 + i*150, 70 + j*140));
         }
         s.draw = () => {
             s.background(0);
-            const a = s.TWO_PI*phase;
-            phase += phaseDelta;
-            if (phase >= 1) phase -= 1;
-            eyes.forEach(e => e.draw());
+            for (let i = 0; i < eyes.length; i++)
+                eyes[i].display();
         }
     }
     new p5(eyes, 'container');
