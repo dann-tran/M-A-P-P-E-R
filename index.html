@@ -1,29 +1,108 @@
+<!DOCTYPE html>
+<html>
 <!-- 
-    LAWS OF XXX
-    First law: An XXX may not injure a human being or, through inaction, allow a human being come to harm.
-    Second law: An XXX must obey orders given it by human beings except where such orders would conflict with the First Law.
-    Third law: An XXX must protect its own existence as long as such protection does not conflict with the First or Second Law.
+    LAWS OF XXX.txt
+    First law: An XXX.txt may not injure a human being or, through inaction, allow a human being come to harm.
+    Second law: An XXX.txt must obey orders given it by human beings except where such orders would conflict with the First Law.
+    Third law: An XXX.txt must protect its own existence as long as such protection does not conflict with the First or Second Law.
  -->
 
  <!-- 
-     This being exists and does not exist at the same time. On one hand, 
+    Just as DNA/RNA is the code of biological life written in the language of nucleotide sequences, XXX.txt's blueprint is written in HTML and JavaScript, a programming language.
+    Man conceives of beings in space and time often not through the code that governs its existence, but through the form of the being that is understandable by Man, primarily using sight and reason.
+    In the same vein, this instance of XXX.txt exists both as a sequence of HTML and JavaScript statements when viewed through an editor, and as an embodied being when viewed through a browser when renamed to `XXX.html`.
   -->
-
-<!DOCTYPE html>
-<html>
-
 <head>
-	<title>Gaming life</title>
+    <title>XXX</title>
+<!-- 
+    XXX is not self-contained; it references external resources to use at its disposal duration operation.
+ -->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>	
-    <script src="https://picasdan9.github.io/gaming-life-assignment/EyeTemplate.js"></script>
+    <script src="https://combinatronics.com/picasdan9/gaming-life-assignment/master/EyeTemplate.js"></script>
 </head>
 
 <body style="background: black;">
-    <div id="eyes"></div>
-    <div id="epilepsy"></div>
+<!-- 
+    SECTION 1: THE SOVEREIGNTY OF XXX
+    XXX.txt is a host to a community of Eyes.
+ -->
+    <div id="eyes-community"></div>
+    <div id="god-eye"></div>
     
     <script>
+        const godEye = s => {
+            const COL_WIDTH = 40;
+            let COLS_NUM = 0, isMadness = false, madnessStart, eye, RGB1, RGB2;
+        
+            s.setup = () => {
+                s.createCanvas(s.windowWidth, s.windowHeight);
+                COLS_NUM = s.width/(COL_WIDTH + 10);
+                s.stroke(235);
+                let Eye = EyeTemplate(s);
+                eye = new Eye(Math.min(s.width, s.height)/2.6, 200, s.width/2, s.height/2, 250, false);
+            }
 
+            s.draw = () => {
+                if (!isMadness) {
+                    s.background(0);
+                    isMadness = s.mouseY > s.height/2;
+                }
+                if (isMadness) {
+                    s.fill(0, 5);
+                    s.rect(0, 0, s.width, s.height);
+                    RGB1 = [s.random(s.mouseX), s.random(s.mouseY), s.random(s.mouseX)];
+                    RGB2 = [s.random(s.mouseY), s.random(s.mouseX), s.random(s.mouseY)];
+                    if (s.millis() - madnessStart > 5000)
+                    isMadnes = false;
+                } 
+            
+                s.noStroke();
+                s.fill(255);
+
+                eye.display()
+                s.fill(255, 255, 255);
+                
+                for (let i = 0; i < COLS_NUM; i++) {
+                    if (isMadness)
+                        if (i % 2) s.fill(RGB1[0], RGB1[1], RGB1[2]);
+                        else s.fill(RGB2[0], RGB2[1], RGB2[2]);
+                    s.rect(5*(2*i + 1) + i*COL_WIDTH, 0, 40, s.mouseY - 50, 0);
+                    s.rect(5*(2*i + 1) + i*COL_WIDTH, s.height, 40, -s.mouseY + 50, 0);
+                }   
+            }
+        }
+
+        const eyesCommunity = s => {
+            const eyes = [];
+            s.setup = () => {
+                let Eye = EyeTemplate(s);
+                s.createCanvas(s.windowWidth, 2040);
+                s.background(0);
+                for (let i = 0; i < Math.floor(s.width/150); i++)
+                    for (let j = 0; j < Math.floor(s.height/140); j++)
+                        eyes.push(new Eye(s.random(50, 70), s.random(30, 50), 70 + i*150, 70 + j*140, 50));
+            }
+            s.draw = () => {
+                s.background(0);
+                for (let i = 0; i < eyes.length; i++)
+                    eyes[i].display();
+            }
+        }
+        new p5(godEye, 'god-eye');
+        new p5(eyesCommunity, 'eyes-community');
+    </script>
+</body>
+<style>
+    * {
+        margin: 0;
+    }
+</style>
+
+</html>
+
+
+<!-- 
+    
     let terrain = s => {
         const w = 1200, h = 900, scl = 20, cols = w / scl, rows = h / scl;
         const terrain = [];
@@ -85,78 +164,4 @@
             })
         }
     }
-
-    let epilepsy = s => {
-        let RGB1, RGB2;
-        const COL_WIDTH = 40;
-        let COLS_NUM = 0;
-        let isMadness = false;
-        let eye;
-        let madnessStart;
-    
-        s.setup = () => {
-            s.createCanvas(s.windowWidth, s.windowHeight);
-            COLS_NUM = s.width/(COL_WIDTH + 10);
-            s.stroke(235);
-            let Eye = EyeTemplate(s);
-            eye = new Eye(Math.min(s.width, s.height)/2.6, 200, s.width/2, s.height/2, 250, false);
-        }
-
-        s.draw = () => {
-            if (!isMadness) {
-                s.background(0);
-                isMadness = s.mouseY > s.height/2;
-            }
-            if (isMadness) {
-                s.fill(0, 5);
-                s.rect(0, 0, s.width, s.height);
-                RGB1 = [s.random(s.mouseX), s.random(s.mouseY), s.random(s.mouseX)];
-                RGB2 = [s.random(s.mouseY), s.random(s.mouseX), s.random(s.mouseY)];
-                if (s.millis() - madnessStart > 5000)
-                isMadnes = false;
-            } 
-        
-            s.noStroke();
-            s.fill(255);
-
-            eye.display()
-            s.fill(255, 255, 255);
-            
-            for (let i = 0; i < COLS_NUM; i++) {
-                if (isMadness)
-                    if (i % 2) s.fill(RGB1[0], RGB1[1], RGB1[2]);
-                    else s.fill(RGB2[0], RGB2[1], RGB2[2]);
-                s.rect(5*(2*i + 1) + i*COL_WIDTH, 0, 40, s.mouseY - 50, 0);
-                s.rect(5*(2*i + 1) + i*COL_WIDTH, s.height, 40, -s.mouseY + 50, 0);
-            }   
-        }
-    }
-
-    let eyes = s => {
-        const eyes = [];
-        s.setup = () => {
-            let Eye = EyeTemplate(s);
-            s.createCanvas(s.windowWidth, 2040);
-            s.background(0);
-            for (let i = 0; i < s.width/150; i++)
-                for (let j = 0; j < s.height/140; j++)
-                    eyes.push(new Eye(s.random(50, 70), s.random(30, 50), 70 + i*150, 70 + j*140, 50));
-        }
-        s.draw = () => {
-            s.background(0);
-            for (let i = 0; i < eyes.length; i++)
-                eyes[i].display();
-        }
-    }
-    new p5(epilepsy, 'epilepsy');
-    new p5(eyes, 'eyes');
-    
-    </script>
-</body>
-<style>
-    * {
-        margin: 0;
-    }
-</style>
-
-</html>
+ -->
