@@ -16,6 +16,7 @@ const EyeTemplate = s =>
             this.xPos2 = xRadius + x;
             this.yPos2 = y;
             
+            this.RGB = [255, 255, 255];
             this.nodeAmount = nodeAmount;
             this.yPosOffset = y;
             this.eyexRadius = xRadius;
@@ -35,6 +36,9 @@ const EyeTemplate = s =>
         }
 
         display() {
+            for (let i = 0; i < 3; i++)
+                if (this.RGB[i] < 255) this.RGB[i] = this.RGB[i] + 1;
+
             this.eyeMovementX = s.random(0, 3);
             if (this.timer < this.blinkMaxTime) this.timer++;
             else {
@@ -43,7 +47,7 @@ const EyeTemplate = s =>
                 this.timer = 0;
             }
 
-            s.fill(255);
+            s.fill(this.RGB[0], this.RGB[1], this.RGB[2]);
             s.bezier(this.xPos1, this.yPos1, this.xNode1, this.yNode1, this.xNode2, this.yNode2, this.xPos2, this.yPos2);
             s.bezier(this.xPos1, this.yPos1 - 1, this.xNode1, this._yNode1, this.xNode2, this._yNode2, this.xPos2, this.yPos2 - 1);
 
@@ -115,5 +119,9 @@ const EyeTemplate = s =>
 
         blink() {
             this.eyeState = -1;
+        }
+
+        mutate() {
+            this.RGB = [Math.floor(s.random(255)), Math.floor(s.random(255)), Math.floor(s.random(255))];
         }
     }
