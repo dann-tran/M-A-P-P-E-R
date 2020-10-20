@@ -32,7 +32,12 @@
      TYPE SOMETHING HERE TO EDIT THE CODE... ETC. INSTRUCTIONS FOR VIEWER TO EDIT
   -->
     <div id="perspective-grid"></div>
-    <div id="boxes"></div>
+    <div id="discipline">
+        <div id="enclosure-1"></div>
+        <div id="enclosure-2"></div>
+        <div id="enclosure-3"></div>
+        <div id="enclosure-4"></div>
+    </div>
     <div style="background: white; width: 100vw; height: 100vh;"></div>
     <div style="background: black; width: 100vw; height: 50vh;"></div>
     <div id="eyes-community"></div>
@@ -107,10 +112,7 @@
         }
 
         const perspectiveGrid = s => {
-            const verticals = [];
-            let yOffset = 0;
-            let rows = 0;
-
+            const verticals = [], xOffsets = [], boxHeights = [], boxZs = [], boxFills = [250, 50];
             s.setup = () => {
                 s.createCanvas(s.windowWidth, s.windowHeight, s.WEBGL);
                 for (let i = 0; i < 50; i++) {
@@ -118,8 +120,11 @@
                     let z = Math.floor(s.random(-10*1000, 0)/50)*50;
                     verticals.push({ x, z });
                 }
-                yOffset = Math.floor(s.width/4/50)*50;
-                rows = Math.floor(s.height/100);
+                for (let i = 0; i < 2; i++) {
+                    boxZs[i] = Math.floor(s.random(-2000, 0)/50)*50;
+                    xOffsets[i] = (i*2 - 1)*Math.floor(s.random(s.width/4, s.width/2)/50)*50;
+                    boxHeights[i] = s.random(s.height/2, s.height);
+                }
             }
 
             s.draw = () => {
@@ -127,86 +132,102 @@
                 s.translate(0, s.height/2);
                 s.stroke(200);
                 
+                const z = -Math.min(s.millis(), 2000);
                 for (let i = -100; i < 100; i++)
-                    s.line(i*50, 0, 0, i*50, 0, -s.millis());
-                for (let i = 0; i < s.millis()/50; i++)
+                    s.line(i*50, 0, 0, i*50, 0, z);
+                for (let i = 0; i < Math.min(s.millis()/50, 2000/50); i++)
                     s.line(-5000, 0, -i*50, 5000, 0, -i*50);
-                s.stroke(20);
-                for (let i = 0; i <= rows; i++) {
-                    s.line(-yOffset, -i*100, 0, -yOffset, -i*100, -s.millis());
-                    s.line(yOffset, -i*100, 0, yOffset, -i*100, -s.millis());
+                
+                s.stroke(100);
+                for (let i = 0; i < 2; i++) {
+                    s.line(xOffsets[i], 0, 0, xOffsets[i], 0, -s.millis());
+                    s.line(xOffsets[i], -boxHeights[i], 0, xOffsets[i], -boxHeights[i], -s.millis());
                 }
-                // for (let i = 0; i < verticals.length; i++)
-                //     if (verticals[i].z > -s.millis())
-                //         s.line(verticals[i].x, 0, verticals[i].z, verticals[i].x, -1000, verticals[i].z);
-                if (s.millis() > 10*1000) {
-                    s.fill(0);
-                    s.translate(Math.floor(s.random(-5000, 5000)/50)*50, -250, Math.floor(s.random(-10*1000, 0)/50)*50);
-                    s.box(-500, -500, -500);
-                    // for (let i = 0; i < verticals.length; i++) {
-                    //     s.translate(verticals[i].x, 0, verticals[i].z);
-                    //     s.box(-500, -500, -500);
-                    //     s.translate(-verticals[i].x, 0, -verticals[i].z);
-                    // }
+                if (s.millis() > 8*1000) { 
+                    s.stroke(50);
+                    s.noFill();
+                    s.translate(xOffsets[0] - boxHeights[0]/2, -boxHeights[0]/2, boxZs[0]);
+                    s.box(boxHeights[0]);
+                    s.translate(-xOffsets[0] + boxHeights[0]/2, boxHeights[0]/2, -boxZs[0])
+                    s.stroke(250);
+                    s.fill(50);
+                    s.translate(xOffsets[1] + boxHeights[1]/2, -boxHeights[1]/2, boxZs[1]);
+                    s.box(boxHeights[1]);
+                }
+                if (s.millis() > 10*1000)
                     s.noLoop();
-                }
-                // for (let i = -100; i < 100; i++)
-                //     s.line(i*50, 0, 0, i*50, 0, -10*1000);
-                // for (let i = 0; i < 10*1000/50; i++)
-                //     s.line(-5000, 0, -i*50, 5000, 0, -i*50);
-                // s.stroke(0);
-                // s.fill(0, 0, 0, 0);
-                // for (let i = 0; i < verticals.length; i++) {
-                //     // s.line(verticals[i].x, 0, verticals[i].z, verticals[i].x, -500, verticals[i].z);
-                //     s.translate(verticals[i].x, 0, verticals[i].z);
-                //     s.box(-500, -500, -500);
-                //     s.translate(-verticals[i].x, 0, -verticals[i].z);
-                // }
-                
-
-
-                
-
             }
         }
 
-        const boxes = s => {
-            let COLS_NUM, ROWS_NUM;
+        // magenta, green, teal, orange, black
+        const COLOURS = [[219, 39, 99], [176, 219, 67], [18, 234, 234], [255, 119, 51], [16, 11, 0]];
+
+        const boxes = color => s => {
+            const COLS_NUM = 2, ROWS_NUM = 2;
+            const ballColors = [];
+            const isHomogenous = [];
+            let observeStart = 0;
+            let cnv;    
+            
             s.setup = () => {
-                s.createCanvas(s.windowWidth, s.windowHeight*2, s.WEBGL);
+                cnv = s.createCanvas(500, 500, s.WEBGL);
+                cnv.mouseOver(() => {
+                    if (observeStart === 0)
+                        observeStart = s.millis();
+                })
                 s.rectMode(s.CENTER);
                 s.angleMode(s.DEGREES);
-                COLS_NUM = Math.floor(s.width/200);
-                ROWS_NUM = Math.floor(s.height/200);
                 xMargin = (s.width - COLS_NUM*200)/2;
                 yMargin = (s.height - ROWS_NUM*200)/2;
+                for (let i = 0; i < ROWS_NUM; i++) {
+                    ballColors[i] = []
+                    for (let j = 0; j < COLS_NUM; j++) {
+                        ballColors[i][j] = []
+                        for (let k = 0; k < 3; k++)
+                            ballColors[i][j][k] = s.random(255);
+                    }
+                }
             }
 
             s.draw = () => {
-                s.background(0);
-
-                for (let i = - Math.floor(COLS_NUM/2); i < COLS_NUM/2; i++) {
-                    for (let j = - Math.floor(ROWS_NUM/2); j < ROWS_NUM/2; j++) {
+                s.background(255);
+                if (s.mouseX > 0 && s.mouseX < s.width && s.mouseY > 0 && s.mouseY < s.height)
+                    for (let i = 0; i < ROWS_NUM; i++)
+                        for (let j = 0; j < COLS_NUM; j++)
+                            for (let k = 0; k < 3; k++) {
+                                if (s.millis() - observeStart < 5*1000)
+                                    ballColors[i][j][k] = ballColors[i][j][k] + (s.random() < 0.5 ? -5 : 5);
+                                else {
+                                    if (ballColors[i][j][k] < color[k])
+                                        ballColors[i][j][k] = ballColors[i][j][k] + 0.5;
+                                    else if (ballColors[i][j][k] > color[k])
+                                        ballColors[i][j][k] = ballColors[i][j][k] - 0.5;
+                                }
+                            }
+                for (let i = 0; i < ROWS_NUM; i++) {
+                    for (let j = 0; j < COLS_NUM; j++) {
                         s.push()
-                        s.translate(j*200, i*200);
+                        s.translate((j - 0.5)*200, (i - 0.5)*200);
                         s.rotate(s.frameCount/2);
+                        s.noStroke();
+                        s.fill(ballColors[i][j][0], ballColors[i][j][1], ballColors[i][j][2]);
+                        s.sphere(20);
                         s.noFill();
-                        s.stroke(255)
-                        s.strokeWeight(2)
-                        s.box(50, 50, 50);
-                        s.stroke("#FF69B4")
-                        s.box(20, 20, 20);
-                        s.stroke("#FF1493")
+                        s.strokeWeight(2);
+                        s.stroke(color[0], color[1], color[2]);
                         s.box(70, 70, 70);
                         s.pop()
                     }
                 }
             }
         }
-        // new p5(boxes, 'boxes');
+        for (let i = 0; i < 4; i++) {
+            new p5(boxes(COLOURS[i]), `enclosure-${i + 1}`);
+        }
+        
         // new p5(godEye, 'god-eye');
         // new p5(eyesCommunity, 'eyes-community');
-        new p5(perspectiveGrid, 'perspective-grid');
+        // new p5(perspectiveGrid, 'perspective-grid');
 
         let scrollVelocity = 1;
         // const autoScroll = setInterval(() => {
@@ -258,6 +279,12 @@
         60% {cursor: url(assets/frame4.png), auto;}
         80% {cursor: url(assets/frame5.png), auto;}
         100% {cursor: url(assets/frame6.png), auto;}
+    }
+
+    #discipline {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
     }
 </style>
 
