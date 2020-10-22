@@ -11,6 +11,7 @@
     Just as DNA/RNA is the genetic code of biological life written in the language of nucleotide sequences, XXX.txt's blueprint is written in HTML and JavaScript.
     Man conceives of beings in space and time often not through the code that governs its existence, but through the form of the being that is understandable by Man, primarily using sight and reason.
     In the same vein, this instance of XXX.txt exists both as a sequence of HTML and JavaScript statements when viewed through an editor, and as an embodied being when viewed through a browser when renamed to `XXX.html`.
+    Different forms of embodiment, when viewed independently, generate distinct modes of knowing. When subsuming them together, a synthesis of meanings is created. But never a totality. 
   -->
 <head>
     <title>XXX</title>
@@ -18,11 +19,15 @@
     XXX is not self-contained; it references external resources to use at its disposal duration operation.
  -->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>	
-    <!-- <script src="https://combinatronics.com/picasdan9/gaming-life-assignment/master/EyeTemplate.js"></script> -->
-    <script src="EyeTemplate.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.2.2/math.min.js"></script>
 </head>
 
 <body style="background: black;">
+    <!-- Preface: Modalities of human-computer interactions 
+        1. Hover
+        2. Click
+        3. Scroll
+    -->
 <!-- 
     SECTION 1: THE SOVEREIGNTY OF XXX
     XXX.txt is a host to a community of Eyes.
@@ -31,24 +36,99 @@
  <!-- 
      TYPE SOMETHING HERE TO EDIT THE CODE... ETC. INSTRUCTIONS FOR VIEWER TO EDIT
   -->
-    <div id="perspective-grid"></div>
+    
+    
+    <!-- resists by deconstruction - destroy and construct again. 
+        destroy the enclosure. but the balls still go in the same direction.
+        coz the balls were wary of their freedom.
+        still have hierarchy -->
+    <div id="preface">
+        <div id="interactivity">
+            <div id="hover"></div>
+            <div id="click"></div>
+        </div>
+        <div style="background: white; width: 100vw; height: 100vh;"></div>
+        <div style="background: black; width: 100vw; height: 50vh;"></div>
+    </div>
+    <div id="eyes-community"></div>
+    <div id="god-eye"></div>
+    <div id="after-god" style="background: white; width: 100vw; height: 100vh;"></div>
+    <div id="perspective-grid" style="padding-bottom: 50px;"></div>
     <div id="discipline">
         <div id="enclosure-1"></div>
         <div id="enclosure-2"></div>
         <div id="enclosure-3"></div>
         <div id="enclosure-4"></div>
     </div>
-    <div style="background: white; width: 100vw; height: 100vh;"></div>
-    <div style="background: black; width: 100vw; height: 50vh;"></div>
-    <div id="eyes-community"></div>
-    <div id="god-eye"></div>
-    <div id="after-god" style="background: white; width: 100vw; height: 100vh;"></div>
+    <div id="to-control"></div>
+    <div id="modulation"></div>
+    <div id="to-mapping"></div>
+    <div id="mapping" class="tracing"></div>
     
     <script>
+        let scrollVelocity = 0;
+        const mousePos = [];
+        let mouseX, mouseY;
+        const COLOURS = [[219, 39, 99], [176, 219, 67], [18, 234, 234], [255, 119, 51]];
+        const isEnclosureDestroyed = [false, false, false, false];
+        let isMappingCreated = false;
+
+        const hover = s => {
+            s.setup = () => {
+                s.createCanvas(400, 400);
+                s.noStroke();
+            }
+
+            s.draw = () => {
+                if (s.mouseX > 100 && s.mouseX < 300 && s.mouseY > 100 && s.mouseY < 300)
+                    s.fill(204);
+                else
+                    s.fill(0);
+                s.rect(100, 100, 200, 200);
+            }
+        }
+
+        const click = s => {
+            s.setup = () => {
+                s.createCanvas(400, 400);
+                s.noStroke();
+            }
+
+            s.draw = () => {
+                if (s.mouseIsPressed)
+                    s.fill(204);
+                else
+                    s.fill(0);
+                s.rect(100, 100, 200, 200);
+            }
+        }
+
+        const eyesCommunity = s => {
+            const eyes = [];
+            s.setup = () => {
+                let Eye = EyeTemplate(s);
+                s.createCanvas(s.windowWidth, s.windowHeight*1.5);
+                s.background(0);
+                for (let i = 0; i < Math.floor(s.width/150); i++)
+                    for (let j = 0; j < Math.floor(s.height/140); j++)
+                        eyes.push(new Eye(s.random(50, 70), s.random(30, 50), 70 + i*150, 70 + j*140, 50));
+            }
+            s.draw = () => {
+                s.background(0);
+                for (let i = 0; i < eyes.length; i++)
+                    eyes[i].display();
+            }
+            s.mouseClicked = () => {
+                for (let i = 0; i < 10; i++)
+                    eyes[Math.floor(s.random(eyes.length))].mutate();
+            }
+        }
+
+
         const godEye = s => {
             const COL_WIDTH = 40, marginToMadness = 100;
             let COLS_NUM = 0, isMadness = false, madnessStart, eye, RGB1, RGB2;
-        
+
             s.setup = () => {
                 s.createCanvas(s.windowWidth, s.windowHeight);
                 COLS_NUM = s.width/(COL_WIDTH + 10);
@@ -88,28 +168,135 @@
                     }
                 }
             }
-        }
+        } 
 
-        const eyesCommunity = s => {
-            const eyes = [];
-            s.setup = () => {
-                let Eye = EyeTemplate(s);
-                s.createCanvas(s.windowWidth, s.windowHeight*1.5);
-                s.background(0);
-                for (let i = 0; i < Math.floor(s.width/150); i++)
-                    for (let j = 0; j < Math.floor(s.height/140); j++)
-                        eyes.push(new Eye(s.random(50, 70), s.random(30, 50), 70 + i*150, 70 + j*140, 50));
+        const EyeTemplate = s =>
+            class Eye {
+                constructor(xRadius, nodeAmount, x, y, pupilRad, isClosable = true) {
+                    this.xPos1 = - xRadius + x;
+                    this.yPos1 = y;
+                    this.xNode1 =  - nodeAmount + x;
+                    this.yNode1 = - nodeAmount + y;
+                    
+                    this._yNode1 = nodeAmount + y;
+                    
+                    this.xNode2 = nodeAmount + x;
+                    this.yNode2 = - nodeAmount + y;
+
+                    this._yNode2 = nodeAmount + y;
+
+                    this.xPos2 = xRadius + x;
+                    this.yPos2 = y;
+                    
+                    this.RGB = [255, 255, 255];
+                    this.nodeAmount = nodeAmount;
+                    this.yPosOffset = y;
+                    this.eyexRadius = xRadius;
+                    this.eyeState = 0;
+                    this.blinkSpeed = 4;
+                    this.blinkMaxTime = s.random(300, 800);
+                    this.timer = 0;
+                    this.isClosable = isClosable;
+
+                    // pupil
+                    this.pupilRad = pupilRad;
+                    this.xPosEllipse = (this.xPos1 + this.xPos2)/2;
+                    this.yPosEllipse = (this.yPos2 + this.yPos1)/2;
+                    this.eyeMovementX = 0;
+                    this.eyeMovementY = 0;
+                    this.closingEye = false;
+                }
+
+                display() {
+                    for (let i = 0; i < 3; i++)
+                        if (this.RGB[i] < 255) this.RGB[i] = this.RGB[i] + 1;
+
+                    this.eyeMovementX = s.random(0, 3);
+                    if (this.timer < this.blinkMaxTime) this.timer++;
+                    else {
+                        this.blinkMaxTime = s.random(300, 800);
+                        this.blink();
+                        this.timer = 0;
+                    }
+
+                    s.fill(this.RGB[0], this.RGB[1], this.RGB[2]);
+                    s.bezier(this.xPos1, this.yPos1, this.xNode1, this.yNode1, this.xNode2, this.yNode2, this.xPos2, this.yPos2);
+                    s.bezier(this.xPos1, this.yPos1 - 1, this.xNode1, this._yNode1, this.xNode2, this._yNode2, this.xPos2, this.yPos2 - 1);
+
+                    s.fill(0);
+                    s.ellipse(this.xPosEllipse + this.eyeMovementX, this.yPosEllipse + this.eyeMovementY, this.pupilRad);
+
+                    if (this.isClosable)
+                        if (s.mouseX > this.xPos1 && s.mouseX < this.xPos2 && s.mouseY > this.yPos1 - this.nodeAmount && s.mouseY < this.yPos1 + this.nodeAmount)
+                            this.closeEye();
+                        else this.openEye();
+
+                    if (s.mouseX > this.xPosEllipse && this.xPosEllipse + this.nodeAmount*2/3 < this.xPos2) this.xPosEllipse += 10;
+                    if (s.mouseX < this.xPosEllipse && this.xPosEllipse - this.nodeAmount*2/3 > this.xPos1) this.xPosEllipse -= 10;
+                    if (s.mouseY > this.yPosEllipse && this.yPosEllipse + this.nodeAmount*2/3 < this.yPos1 + this.nodeAmount) this.yPosEllipse += 10;
+                    if (s.mouseY < this.yPosEllipse && this.yPosEllipse - this.nodeAmount*2/3 > this.yPos1 - this.nodeAmount) this.yPosEllipse -= 10;
+
+                    if (this.eyeState == -1) {
+                        let flag = true;
+                        if (this.yNode1 < this.yPosOffset) {
+                            this.yNode1 += this.blinkSpeed;
+                            flag = false;
+                        }
+                        if (this.yNode2 < this.yPosOffset) {
+                            this.yNode2 += this.blinkSpeed;
+                            flag = false;
+                        }
+                        if (this._yNode1 > this.yPosOffset) {
+                            this._yNode1 -= this.blinkSpeed;
+                            flag = false;
+                        }
+                        if (this._yNode2 > this.yPosOffset) {
+                            this._yNode2 -= this.blinkSpeed;
+                            flag = false;
+                        }
+                        if (flag) this.eyeState = 1;
+                    }
+                    if (this.eyeState == 1) {
+                        let flag = true;
+                        if (this.yNode1 >- this.nodeAmount + this.yPosOffset) {
+                            this.yNode1 -= this.blinkSpeed;
+                            flag = false;
+                        } 
+                        if (this.yNode2 > - this.nodeAmount + this.yPosOffset) {
+                            this.yNode2 -= this.blinkSpeed;
+                            flag = false;
+                        } 
+                        if (this._yNode1 < + this.nodeAmount + this.yPosOffset) {
+                            this._yNode1 += this.blinkSpeed;
+                            flag = false;
+                        }
+                        if (this._yNode2 < + this.nodeAmount + this.yPosOffset) {
+                            this._yNode2 += this.blinkSpeed;
+                            flag = false;
+                        } 
+                        if (flag && !this.closingEye) this.eyeState = 0;
+                    }
+                }
+
+                closeEye() {
+                    this.eyeState = -1;
+                    this.closingEye = true;
+                }
+
+                openEye() {
+                    this.eyeMovementX = 0;
+                    this.eyeMovementY = 0
+                    this.closingEye = false;
+                }
+
+                blink() {
+                    this.eyeState = -1;
+                }
+
+                mutate() {
+                    this.RGB = [Math.floor(s.random(255)), Math.floor(s.random(255)), Math.floor(s.random(255))];
+                }
             }
-            s.draw = () => {
-                s.background(0);
-                for (let i = 0; i < eyes.length; i++)
-                    eyes[i].display();
-            }
-            s.mouseClicked = () => {
-                for (let i = 0; i < 10; i++)
-                    eyes[Math.floor(s.random(eyes.length))].mutate();
-            }
-        }
 
         const perspectiveGrid = s => {
             const verticals = [], xOffsets = [], boxHeights = [], boxZs = [], boxFills = [250, 50];
@@ -159,18 +346,18 @@
             }
         }
 
-        // magenta, green, teal, orange, black
-        const COLOURS = [[219, 39, 99], [176, 219, 67], [18, 234, 234], [255, 119, 51], [16, 11, 0]];
-
-        const boxes = color => s => {
+        const enclosure = idx => s => {
+            const color = COLOURS[idx];
             const COLS_NUM = 2, ROWS_NUM = 2;
             const ballColors = [];
             const isHomogenous = [];
             let observeStart = 0;
             let cnv;    
-            
+            const ballPosOffsets = [];
+            const boxColor = [color[0], color[1], color[2]]
+
             s.setup = () => {
-                cnv = s.createCanvas(500, 500, s.WEBGL);
+                cnv = s.createCanvas(600, 600, s.WEBGL);
                 cnv.mouseOver(() => {
                     if (observeStart === 0)
                         observeStart = s.millis();
@@ -180,9 +367,11 @@
                 xMargin = (s.width - COLS_NUM*200)/2;
                 yMargin = (s.height - ROWS_NUM*200)/2;
                 for (let i = 0; i < ROWS_NUM; i++) {
-                    ballColors[i] = []
+                    ballColors[i] = [];
+                    ballPosOffsets[i] = [];
                     for (let j = 0; j < COLS_NUM; j++) {
-                        ballColors[i][j] = []
+                        ballColors[i][j] = [];
+                        ballPosOffsets[i][j] = [s.random(-100, 100), s.random(-100, 100)];
                         for (let k = 0; k < 3; k++)
                             ballColors[i][j][k] = s.random(255);
                     }
@@ -191,9 +380,15 @@
 
             s.draw = () => {
                 s.background(255);
-                if (s.mouseX > 0 && s.mouseX < s.width && s.mouseY > 0 && s.mouseY < s.height)
+                if ((s.mouseX > 0 && s.mouseX < s.width && s.mouseY > 0 && s.mouseY < s.height) || s.millis() - observeStart > 8*1000)
                     for (let i = 0; i < ROWS_NUM; i++)
-                        for (let j = 0; j < COLS_NUM; j++)
+                        for (let j = 0; j < COLS_NUM; j++) {
+                            for (let k = 0; k < 2; k++) {
+                                if (ballPosOffsets[i][j][k] > 0)
+                                    ballPosOffsets[i][j][k] = ballPosOffsets[i][j][k] - 0.5;
+                                else if (ballPosOffsets[i][j][k] < 0)
+                                    ballPosOffsets[i][j][k] = ballPosOffsets[i][j][k] + 0.5;
+                            }
                             for (let k = 0; k < 3; k++) {
                                 if (s.millis() - observeStart < 5*1000)
                                     ballColors[i][j][k] = ballColors[i][j][k] + (s.random() < 0.5 ? -5 : 5);
@@ -204,6 +399,7 @@
                                         ballColors[i][j][k] = ballColors[i][j][k] - 0.5;
                                 }
                             }
+                        }
                 for (let i = 0; i < ROWS_NUM; i++) {
                     for (let j = 0; j < COLS_NUM; j++) {
                         s.push()
@@ -211,48 +407,312 @@
                         s.rotate(s.frameCount/2);
                         s.noStroke();
                         s.fill(ballColors[i][j][0], ballColors[i][j][1], ballColors[i][j][2]);
+                        s.translate(ballPosOffsets[i][j][0], ballPosOffsets[i][j][1]);
                         s.sphere(20);
+                        s.translate(-ballPosOffsets[i][j][0], -ballPosOffsets[i][j][1]);
                         s.noFill();
                         s.strokeWeight(2);
-                        s.stroke(color[0], color[1], color[2]);
+                        s.stroke(boxColor[0], boxColor[1], boxColor[2]);
                         s.box(70, 70, 70);
                         s.pop()
                     }
                 }
             }
-        }
-        for (let i = 0; i < 4; i++) {
-            new p5(boxes(COLOURS[i]), `enclosure-${i + 1}`);
-        }
-        
-        // new p5(godEye, 'god-eye');
-        // new p5(eyesCommunity, 'eyes-community');
-        // new p5(perspectiveGrid, 'perspective-grid');
 
-        let scrollVelocity = 1;
-        // const autoScroll = setInterval(() => {
-        //         window.scrollBy(0, scrollVelocity);
-        // }, 10);
+            s.mouseClicked = () => {
+                if (s.mouseX > 0 && s.mouseX < s.width && s.mouseY > 0 && s.mouseY < s.height)
+                    for (let i = 0; i < 3; i++) {
+                        if (boxColor[i] < 255)
+                            boxColor[i] = boxColor[i] + 20;
+                    }
+                    if (boxColor[0] > 230 && boxColor[1] > 230 && boxColor[2] > 230)
+                        isEnclosureDestroyed[idx] = true;
+            }
+        }
 
+        const modulation = s => {
+            const dimensions = 4, scale = 200, step = 0.01, n = 50, angleStep = 360/10;
+            let angle = 0.01, thePoints, rotsLabels, kMax;
+            
+            s.setup = () => {
+                s.createCanvas(s.windowWidth, s.windowHeight);
+                createPointsAndRotationsLabels();
+                s.colorMode(s.HSB);
+                s.angleMode(s.DEGREES);
+                s.noFill();
+                kMax = s.random(0.6, 1.0);
+            };
+
+            s.draw = () => {
+                s.noStroke();
+                s.background(195, 94, 20);
+                let t = s.frameCount/100;
+                for (let i = n; i > 0; i--) {
+                    let alpha = 1 - (i / n);
+                    s.fill(30*alpha, 84, 82, alpha);
+                    let size = i*0.05;
+                    let k = kMax * Math.sqrt(i/n);
+                    let noisiness = 200*i/n;
+                    s.beginShape();
+                    let angleStep = 360 / 10;
+                    for (let theta = 0; theta <= 360 + 2 * angleStep; theta += angleStep) {
+                        const r1 = s.cos(theta) + 1, r2 = s.sin(theta) + 1;
+                        let r = size + s.noise(k*r1,  k*r2, t - i*step)*noisiness;
+                        let x = s.width/2 + r*s.cos(theta);
+                        let y = s.height/2 + r*s.sin(theta);
+                        s.curveVertex(x, y);
+                    }
+                    s.endShape();
+                }
+
+                s.stroke(255);
+                s.fill(255);
+
+                const points2d = [];
+                for (let i = 0; i < thePoints.length; i++) {
+                    let rotated = thePoints[i];
+                    for (let j = 0; j < rotsLabels.length; j++)
+                        rotated = math.multiply(rotationMatrix(rotsLabels[j], angle), rotated);
+
+                    const distance = 3;
+                    const f = 1 / (distance - rotated[dimensions - 1]);
+                    const projection = [[], []];
+                    for(let j = 0; j < dimensions; j++) {
+                        projection[0].push(0);
+                        projection[1].push(0);
+                    }
+                    projection[0][0] = f;
+                    projection[1][1] = f;
+                    points2d[i] = [math.multiply(projection, rotated), f];
+                }
+
+                psets(points2d);
+                angle += 0.03 / dimensions;
+            }
+
+            const psets = points2d => {
+                for (let j = 0; j < thePoints.length; j++) {
+                    for (let i = 0; i < thePoints.length; i++) {
+                        if (i === j) continue;
+                        let squareSum = 0;
+                        for (let k = 0; k < dimensions; k++) {
+                            squareSum += Math.pow(thePoints[j][k] - thePoints[i][k], 2);
+                        }
+                        const d = Math.sqrt(squareSum);
+                        if (d === 2) 
+                            s.line(points2d[i][0][0] * scale + s.width / 2, points2d[i][0][1] * scale + s.height / 2, points2d[j][0][0] * scale + s.width / 2, points2d[j][0][1] * scale + s.height / 2);
+                    }
+                }
+
+                for (let i = 0; i < points2d.length; i++) {
+                    const x = points2d[i][0][0];
+                    const y = points2d[i][0][1];
+                    const size = Math.pow((points2d[i][1])*6,2);
+                    s.ellipse(x * scale + s.width / 2, y * scale + s.height / 2, size, size);
+                }
+            }
+
+            const pad = (n, length) => {
+                let len = length - ('' + n).length;
+                return (len > 0 ? new Array(++len).join('0') : '') + n
+            }
+            const createPointsAndRotationsLabels = () => {
+                const p = Math.pow(2, dimensions);
+                thePoints = [];
+                for(let j = p - 1; j >= 0; j--) {
+                    const n = parseInt(j, 10).toString(2);
+                    const col = (pad(n, dimensions));
+                    const row = [];
+                    for(let i = 0; i < dimensions; i++) {
+                    row.push(col[i] * 2 - 1);
+                    }
+                    thePoints.push(row);
+                }
+                rotsLabels = combineUnique(dimensions, 2);
+            };
+            
+            const rotationMatrix = (rotIndex, a) => {
+                let rotationArray = [];
+                for(let row = 1; row <= dimensions; row++) {
+                    let rotationArrayX = [];
+                    for(let col = 1; col <= dimensions; col++) {
+                    if(col === rotIndex[0] && row === rotIndex[0]) rotationArrayX.push(Math.cos(a));
+                    else if(col === rotIndex[1] && row === rotIndex[0]) rotationArrayX.push(-Math.sin(a));
+                    else if(col === rotIndex[0] && row === rotIndex[1]) rotationArrayX.push(Math.sin(a));
+                    else if(col === rotIndex[1] && row === rotIndex[1]) rotationArrayX.push(Math.cos(a));
+                    else if(col === row) rotationArrayX.push(1);
+                    else rotationArrayX.push(0);
+                    }
+                    rotationArray.push(rotationArrayX);
+                }
+                return rotationArray;
+            };
+        }
+
+        function combineUnique(n, k) {
+            const result = [];
+            const values = [];
+            for(let i = 1; i <= n; i++) {
+                values[i - 1] = i;
+            }
+            let perm = [];
+            for(let i = 0; i < n; i++) {
+                if(i < k) perm[i] = 1;
+                else perm[i] = 0;
+            }
+            perm.sort();
+
+            whileloop: while (true) {
+                const subresult = [];
+                for (let i = 0; i < n; i++) {
+                    if (perm[i] === 1) subresult.push(values[i]);
+                }
+                result.push(subresult);
+                for (let i = n - 1; i > 0; i--) {
+                    if (perm[i - 1] === 1) continue;
+                    if (perm[i] === 1) {
+                        perm[i - 1] = 1;
+                        perm[i] = 0;
+                        perm = perm.slice(0, i).concat(perm.slice(i).sort());
+                        continue whileloop;
+                    }
+                }
+                break;
+            }
+            return result;
+        }
+
+        const tracing = s => {
+            s.setup = () => {
+                s.createCanvas(s.windowWidth, s.windowHeight);
+                s.background(0);
+            }
+
+            s.draw = () => {
+                s.stroke(255);
+                s.noFill();
+                s.beginShape();
+                for (let i = 0; i < mousePos.length; i++) {
+                    s.vertex(mousePos[i].x*s.width, mousePos[i].y*s.height);
+                }
+                s.endShape();
+            }
+        }
+
+        const cartography = s => {
+            let d = 100; r = 5; t = 50;
+
+            s.setup = () => {
+                s.createCanvas(s.windowWidth, s.windowHeight);
+                s.colorMode(s.HSB, 360, 100, 100, 0.4);
+                s.smooth(8);
+                s.strokeWeight(0.5);
+            }
+
+            s.draw = () => {
+                s.background(0);
+                r = s.mouseY/3;
+                for (let i = 0; i < mousePos.length; i++) {
+                    s.stroke(Math.floor(s.random(360)), 90, 90);
+                    s.point(mousePos[i].x, mousePos[i].y);
+                    for (let e = 0; e < mousePos.length; e++) {
+                        if (inr(mousePos[i].x*s.width, mousePos[i].y*s.height, mousePos[e].x*s.width, mousePos[e].y*s.height, r)) {
+                            s.stroke(Math.floor(s.random(220)), 90, 90, 0.05);
+                            s.line(mousePos[i].x*s.width, mousePos[i].y*s.height, mousePos[e].x*s.width, mousePos[e].y*s.height);
+                        }
+                    }
+                }
+                s.noLoop();
+            }
+            s.mouseMoved = () => s.loop();
+
+            const inr = (x1, y1, x2, y2, r) => (x1 - x2)**2 + (y1 - y2)**2 <= r**2;
+        }
+
+        new p5(hover, "hover");
+        new p5(click, "click");
+        new p5(eyesCommunity, "eyes-community");
+        new p5(godEye, "god-eye");
+
+        const prefaceEl = document.getElementById("preface");
         const eyesCommunityEl = document.getElementById("eyes-community");
         const godEyeEl = document.getElementById("god-eye");
         const afterGodEl = document.getElementById("after-god");
-        
+        const perspectiveGridEl = document.getElementById("perspective-grid");
+        const disciplineEl = document.getElementById("discipline");
+        const toControlEl = document.getElementById("to-control");
+        const modulationEl = document.getElementById("modulation");
+        const toMappingEl = document.getElementById("to-mapping");
+        const mappingEl = document.getElementById("mapping");
+        const autoScroll = setInterval(() => {
+                window.scrollBy(0, scrollVelocity);
+        }, 10);
+
+        const createCheckEnclosures = () => {
+            const checkEnclosure = setInterval(() => {
+                for (let i = 0; i < isEnclosureDestroyed.length; i++)
+                    if (!isEnclosureDestroyed[i]) return;
+                toControlEl.className = "to-modulation";
+                new p5(modulation, 'modulation');
+                modulationEl.className = "modulation";
+                toMappingEl.className = "to-mapping";
+                if (mappingEl.className === "tracing")
+                    new p5(tracing, 'mapping');
+                else if (mappingEl.className === "cartography")
+                    new p5(cartography, 'mapping');
+                else
+                    mappingEl.className = "black-box";
+                isMappingCreated = true;
+                clearInterval(checkEnclosure);
+            }, 1000)
+        }
+
         window.onscroll = () => {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-                godEyeEl.parentNode.removeChild(godEyeEl);
+            if (scrollVelocity == 0 && window.scrollY >= 400)
+                scrollVelocity = 1;
+
+            if (godEyeEl.parentNode && (window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
                 clearInterval(autoScroll);
+                godEyeEl.parentNode.removeChild(godEyeEl);
+                afterGodEl.parentNode.removeChild(afterGodEl);
+                prefaceEl.parentNode.removeChild(prefaceEl);
+                document.body.style.backgroundColor = "white";
+                new p5(perspectiveGrid, 'perspective-grid');
+                setTimeout(() => {
+                    eyesCommunityEl.parentNode.removeChild(eyesCommunityEl);
+                    for (let i = 0; i < COLOURS.length; i++) {
+                        new p5(enclosure(i), `enclosure-${i + 1}`);
+                    }
+                    createCheckEnclosures();
+                }, 8000);
             }
+
             if (scrollVelocity > 0) {
                 if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - afterGodEl.offsetHeight)
                     scrollVelocity *= -1;
-                else if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - godEyeEl.offsetHeight - afterGodEl.offsetHeight)
-                    scrollVelocity *= 1.05;
-                else if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - eyesCommunity.offsetHeight/2 - godEyeEl.offsetHeight - afterGodEl.offsetHeight)
-                    scrollVelocity *= 1.01;
+                // else if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - godEyeEl.offsetHeight - afterGodEl.offsetHeight)
+                //     scrollVelocity *= 1.05;
+                // else if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - eyesCommunity.offsetHeight/2 - godEyeEl.offsetHeight - afterGodEl.offsetHeight)
+                //     scrollVelocity *= 1.01;
             }
 
+            if (perspectiveGridEl.parentNode && disciplineEl.parentNode && toControlEl.parentNode && isMappingCreated && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - mappingEl.offsetHeight) {
+                perspectiveGridEl.parentNode.removeChild(perspectiveGridEl);
+                disciplineEl.parentNode.removeChild(disciplineEl);
+                toControlEl.parentNode.removeChild(toControlEl);
+                document.body.style.backgroundColor = "black";
+            }
         };
+
+        document.onmousemove = (evt) => {
+            mouseX = evt.pageX;
+            mouseY = evt.pageY;
+        }
+        setInterval(() => {
+            if (mousePos.length > 100)
+                mousePos.splice(Math.floor(Math.random()*mousePos.length), 1);
+            mousePos.push({ x: mouseX/document.body.clientWidth, y: mouseY/document.body.clientHeight });
+        }, 1000);
     </script>
 </body>
 <style>
@@ -281,77 +741,36 @@
         100% {cursor: url(assets/frame6.png), auto;}
     }
 
-    #discipline {
+    #discipline, #interactivity {
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
+        background: white;
+    }
+
+    .to-modulation {
+        width: 100vw;
+        height: 100vh;
+        background-image: linear-gradient(white, hsl(195, 88.9%, 10.6%));
+    }
+
+    .modulation {
+        background: hsl(195, 88.9%, 10.6%);
+        padding: 100vh 0;
+        width: 100vw;
+        margin: 0;
+    }
+
+    .to-mapping {
+        width: 100vw;
+        height: 100vh;
+        background-image: linear-gradient(hsl(195, 88.9%, 10.6%), black);
+    }
+
+    .black-box {
+        width: 100vw;
+        height: 100vh;
+        background: black;
     }
 </style>
-
 </html>
-
-
-<!-- 
-    
-    let terrain = s => {
-        const w = 1200, h = 900, scl = 20, cols = w / scl, rows = h / scl;
-        const terrain = [];
-        let flying = 0, speed = 0.1;
-        let inconsolata;
-
-        s.preload = () => {
-            inconsolata = s.loadFont("https://picasdan9.github.io/gaming-life-assignment/assets/Roboto-Regular.ttf");
-            console.log(inconsolata);
-        }
-
-        s.setup = () => {
-            s.createCanvas(600, 600, s.WEBGL);
-            s.textFont(inconsolata);
-            s.textSize(s.width / 3);
-            s.textAlign(s.CENTER, s.CENTER);
-        }
-
-        s.draw = () => {
-            if (s.keyIsDown(87)) flying -= speed;
-            else if (s.keyIsDown(83)) flying += speed;
-            let yoff = flying;
-
-            for (let y = 0; y < rows; y++) {
-                let xoff = 0;
-                for (let x = 0; x < cols; x++) {
-                    if (!terrain[x])
-                        terrain[x] = []; 
-                    terrain[x][y] = s.map(s.noise(xoff, yoff), 0, 1, -100, 100);
-                    xoff += 0.2;
-                }
-                yoff += 0.2;
-            }
-            
-            s.background(0);
-            s.stroke(255);
-            s.noFill();
-
-            s.rotateX(s.PI/3);
-            s.translate(-w/2, -h/2);
-
-            for (let y = 0; y < rows - 1; y++) {
-                s.beginShape(s.TRIANGLE_STRIP);
-                for (let x = 0; x < cols; x++) {
-                    s.vertex(x*scl, y*scl, terrain[x][y]);
-                    s.vertex(x*scl, (y + 1)*scl, terrain[x][y + 1]);
-                }
-                s.endShape();
-            }
-
-            s.translate(w/2, h/2);
-
-            s.fill(255);
-            ["gaming", "life", "is", "meaningless"].forEach((t, idx) => {
-                s.translate(0, -(10*idx + flying)*scl*10, 0);
-                s.rotateX(-s.PI/2);
-                s.text(t, 0, 0);
-                s.rotateX(s.PI/2);
-            })
-        }
-    }
- -->
