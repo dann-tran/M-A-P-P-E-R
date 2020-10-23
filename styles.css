@@ -1,0 +1,56 @@
+* {
+    margin: 0;
+    cursor: url(assets/frame1.png), auto;
+    -webkit-animation: cursor 400ms infinite;
+    animation: cursor 400ms infinite;
+}
+
+@-webkit-keyframes cursor {
+    0% {cursor: url(assets/frame1.png), auto;}
+    20% {cursor: url(assets/frame2.png), auto;}
+    40% {cursor: url(assets/frame3.png), auto;}
+    60% {cursor: url(assets/frame4.png), auto;}
+    80% {cursor: url(assets/frame5.png), auto;}
+    100% {cursor: url(assets/frame6.png), auto;}
+} 
+
+@keyframes cursor {
+    0% {cursor: url(assets/frame1.png), auto;}
+    20% {cursor: url(assets/frame2.png), auto;}
+    40% {cursor: url(assets/frame3.png), auto;}
+    60% {cursor: url(assets/frame4.png), auto;}
+    80% {cursor: url(assets/frame5.png), auto;}
+    100% {cursor: url(assets/frame6.png), auto;}
+}
+
+#discipline, #interactivity {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    background: white;
+}
+
+.to-modulation {
+    width: 100vw;
+    height: 100vh;
+    background-image: linear-gradient(white, hsl(195, 88.9%, 10.6%));
+}
+
+.modulation {
+    background: hsl(195, 88.9%, 10.6%);
+    padding: 100vh 0;
+    width: 100vw;
+    margin: 0;
+}
+
+.to-mapping {
+    width: 100vw;
+    height: 100vh;
+    background-image: linear-gradient(hsl(195, 88.9%, 10.6%), black);
+}
+
+.black-box {
+    width: 100vw;
+    height: 100vh;
+    background: black;
+}
